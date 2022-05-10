@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const DB = require("../database"); // DB 정보 가져오기
 const { smtpTransport } = require("../email");
+const { nextTick } = require("process");
 
 router.use(express.urlencoded({ extended: true }));
 router.use(express.json());
@@ -104,6 +105,61 @@ const register = async function (req,res){
     
 
 }
+const verifyIDPW = async function(req,res,next){
+  const student_id = req.body.student_id;
+  const password = req.body.password;
+  
+
+
+  try{
+    const [data] = await DB.promise().query(`
+    SELECT salt, password from student where student_id=${student_id}`);
+
+    //데이터가 없다면 등록된 아이디가 아닙니다. 출력로직 작성필요
+    const req_pw=[crypto.pbkdf2Sync(password,data[0].salt,9999,64,"sha512").toString("base64"),]
+    //비밀번호 일치
+    if(req_pw===data[0].password){ 
+
+      console.log("비밀번호 일치");
+      next();
+    //비밀번호 불일치
+    }else{ 
+      console.log("비밀번호가 일치하지 않습니다.")
+      res.json({status:"fail",text:"비밀번호가 일치하지 않습니다."});
+
+
+
+    }
+
+  }catch(e){
+
+    console.log(e);
+    res.status(400).json({ status:"fail",text: "ErrorCode:400, 잘못된 요청입니다." });
+
+
+  }
+}
+
+  const login = async function(req,res){
+    const student_id = req.body.student_id;
+    const password = req.body.password;
+    try{
+
+      const token= jwt.sign({_id:student_id},process.env.JWT_SECRET,{expiresIn:"1h",issuer:"AjouMoyeo"})
+      res.json({
+        status:"success",
+        text:"토큰이 발급되었습니다.",
+        token:token
+
+      })
+
+    }catch(e){
+      console.log("로그인 에러");
+      res.status(400).json({ status:"fail",text: "ErrorCode:400, 잘못된 요청입니다." });
+
+
+    }
+}
 /**
  * @swagger
  *
@@ -131,4 +187,5 @@ const register = async function (req,res){
 
 
 router.post("/register",register);
+router.post("/login",verifyIDPW,login);
 module.exports= router;
