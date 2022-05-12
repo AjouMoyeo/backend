@@ -114,11 +114,11 @@ const verifyIDPW = async function(req,res,next){
   try{
     const [data] = await DB.promise().query(`
     SELECT salt, password from student where student_id=${student_id}`);
-
+    console.log(data[0].password);
     //데이터가 없다면 등록된 아이디가 아닙니다. 출력로직 작성필요
     const req_pw=[crypto.pbkdf2Sync(password,data[0].salt,9999,64,"sha512").toString("base64"),]
     //비밀번호 일치
-    if(req_pw===data[0].password){ 
+    if(req_pw==data[0].password){ 
 
       console.log("비밀번호 일치");
       next();

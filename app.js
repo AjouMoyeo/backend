@@ -7,6 +7,7 @@ const { swaggerUi, specs } = require('./swagger');
 
 const bodyParser= require("body-parser");
 const auth = require("./routes/auth");
+const post = require("./routes/post");
 require("dotenv").config();
 var app = express();
 app.use(cors());
@@ -17,6 +18,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 
 app.use("/auth",auth);
+app.use("/post",post);
 var server = http.createServer(app).listen(app.get('port'), function(){
 
 	//const dir= './photo';
