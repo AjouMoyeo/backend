@@ -5,14 +5,17 @@ const db= require('../database.js');
 db.connect();
 const multer= require('multer');
 const verifyToken = require('./authMiddleware');
+const { verify } = require('crypto');
+
+
 
 const storage = multer.diskStorage({
     destination: function(req, file, callback){
         callback(null, 'photo/')
     },
-    filename: function(req, file, callback){
-        callback(null, Date.now()+'-'+file.originalname)
-    }
+    filename: function (req, file, callback) {
+        callback(null, Date.now() + "-" + file.originalname);
+      },
 });
 
 const upload= multer({
@@ -22,6 +25,7 @@ const upload= multer({
 		fileSize: 1024*1024*5
 	}
 });
+
 
 const getpost = async function (req,res){
 
@@ -76,12 +80,69 @@ const addpost_nophoto= async function(req,res){
     const is_number= req.body.is_number;
     console.log(req.body);
     try{
-        const data=await db.promise().query(`INSERT INTO post(student_id,title,text,category,goal_num,is_anony,is_number) VALUES(${student_id},'${title}','${text}','${category}','${goal_num}',${is_anony}, ${is_number})`);
+
+        //글 등록. 
+        const [data]=await db.promise().query(`INSERT INTO post(student_id,title,text,category,goal_num,is_anony,is_number) VALUES(${student_id},'${title}','${text}','${category}','${goal_num}',${is_anony}, ${is_number})`); 
+        //글 작성자도 참여자에 추가.
+        const insert_id= data.insertId;
+    
+        await db.promise().query(`INSERT INTO participant(student_id, post_id) values(${student_id}, ${insert_id})`);
         res.json({status:"success",text:"글 등록이 완료되었습니다."});
 
+        
     }catch(e){
         
         console.log('addpost에서 error 발생!');
+        console.log(e);
+        res.status(400).json({ status: "fail" ,e});
+
+    }
+
+
+}
+
+const addpost_multiphoto= async function(req,res){
+    const photos = req.files;
+    const student_id = req.decoded._id;
+    const title= req.body.title;
+    const text= req.body.text;
+    const category=req.body.category;
+    const goal_num=req.body.goal_num;
+    const is_anony= req.body.is_anony;
+    const is_number= req.body.is_number;
+    try{
+        //게시글 저장.
+        const [data] = await db
+        .promise()
+        .query(
+          `INSERT INTO post(student_id,title,category,goal_num,text,is_anony,is_number) VALUES(${student_id},'${title}','${category}',${goal_num},'${text}',${is_anony},${is_number} )`
+        );
+        //사진 저장
+        console.log(data.insertId);
+        const insertid = data.insertId;
+        console.log("파일 여러개 " + photos.length);
+        photos.forEach(async (photo, idx) => {
+            const photo_url = `/photo/${photo.filename}`;
+            console.log(photo_url);
+            const [photo_data] = await db
+            .promise()
+            .query(
+                `INSERT INTO photo (post_id,url) VALUES(${insertid},'${photo_url}');`
+            );
+        if (idx == 0) {
+          // 첫번째 사진을 Thumbnail 이미지로 변경.
+          await db
+            .promise()
+            .query(`UPDATE photo SET is_thumbnail=1 WHERE url='${photo_url}';`);
+        }
+
+        //글 작성자 판매자로 추가
+        await db.promise().query(`INSERT INTO participant(student_id, post_id) values(${student_id}, ${insertid})`);
+      });
+  
+      res.json({ status: "success" ,text:"글 작성을 완료하였습니다."});
+
+    }catch(e){
         console.log(e);
         res.status(400).json({ status: "fail" ,e});
 
@@ -127,11 +188,58 @@ const editpost_nophoto= async function(req,res){
 
 
 }
+const editpost_multiphoto=async function(req,res){
+    const photos = req.files;
+    const post_id = req.params.id;
+    const student_id = req.decoded._id;
+    const title= req.body.title;
+    const text= req.body.text;
+    const category=req.body.category;
+    const goal_num=req.body.goal_num;
+    const is_anony= req.body.is_anony;
+    const is_number= req.body.is_number;
+    try{
+        const [checkID]= await db.promise().query(`select student_id from post where post_id=${post_id};`);
+        console.log(checkID);
+        if(checkID.student_id!=student_id){
+          res.json({status:"fail",text:"글 작성자만 수정이 가능합니다."});
+        }
+        else{
+            await db.promise().query(`DELETE from photo where post_id=${post_id};`); //본래 있던 사진 삭제.
+            photos.forEach(async (photo, idx) => {
+                const photo_url = `/photo/${photo.filename}`;
+                console.log(photo_url);
+                await db
+                .promise()
+                .query(
+                    `INSERT INTO photo (post_id,url) VALUES(${post_id},'${photo_url}');`);
+                if (idx == 0) {
+                // 첫번째 사진을 Thumbnail 이미지로 변경.
+                    await db
+                        .promise()
+                        .query(`UPDATE photo SET is_thumbnail=1 WHERE url='${photo_url}';`);
+                }
+            })
+            await db.promise().query(
+                `UPDATE post 
+                SET title='${title}', text='${text}',goal_num='${goal_num}',category='${category}',is_anony=${is_anony},is_number=${is_number}'  
+                WHERE post_id=${post_id};`)
+                res.json({status:"success",text:"글 수정이 완료되었습니다."});
+        }
+    }catch(e){
+        console.log(e);
+        res.json({status:"fail",text:"오류"});
+
+    }
+
+
+
+}
+
 
 const delpost = async function(req,res){
     const student_id=req.decoded._id;
     const post_id = req.params.id;
-
     try{
         const [checkID]= await db.promise().query(`select student_id from post where post_id=${post_id};`);
         if(checkID[0].student_id!=student_id){ //글 작성자 아닌경우
@@ -147,6 +255,32 @@ const delpost = async function(req,res){
             //사진 추가시 사진 삭제 로직도 작성 해야함.
         }
 
+    }catch(e){  
+        console.log(e);
+        res.status(400).json({ status: "fail" ,e});
+
+    }
+}
+
+const join = async function(req,res){
+    const student_id=req.decoded._id;
+    const post_id = req.params.postid;
+
+    try{
+
+        // 1. 이미 참여했는지 확인 후 참여하지 않았다면 참여 진행.
+
+        const [result] = await db.promise().query(`select userid from particiapnt where post_id =${post_id} and student_id=${student_id}`);
+        console.log(result[0]);
+        if (result[0]==undefined){
+            await db.promise().query(`insert into participant(student_id,post_id) values(${student_id},${post_id})`);
+            res.json({status:"success",text:"모임에 참여하였습니다."});
+        }
+        else{ //이미 참여 했던 경우
+            res.json({status:"fail", text:"이미 모임에 참여하였습니다."});
+
+        }
+
     }catch(e){
         
         
@@ -154,21 +288,42 @@ const delpost = async function(req,res){
         res.status(400).json({ status: "fail" ,e});
 
     }
-
-    
-
 }
+const leave = async function(req,res){
+    const student_id=req.decoded._id;
+    const post_id = req.params.postid;
+
+    try{
+        const [result] = await db.promise().query(`select userid from particiapnt where post_id =${post_id} and student_id=${student_id}`);
+        console.log(result[0]);
+        if (result[0]==undefined){
+            res.json({status:"fail", text:"모임에 참여하지 않아 취소 할 수 없습니다."});
+        }
+        else{ //이미 참여 했던 경우
+            await db.promise().query(`insert into participant(student_id,post_id) values(${student_id},${post_id})`);
+            res.json({status:"success",text:"모임 참여를 취소하였습니다."});
+        }
+
+    }catch(e){
+        console.log(e);
+        res.status(400).json({ status: "fail" ,e});
+    }
+}
+
 
 
 //router.post("/search",searchpostbytitle);
 router.get("/all",getALLpost);
 router.get("/:id",getpost);
-//ㄱouter.put("/edit/:id",editpost_nophoto);
+
 //router.put("/edit/single/:id",upload.single("photo"),editpost_onephoto);
-//router.put("/edit/multi/:id",upload.array("photo"),editpost_multiphoto);
+
 router.delete("/delete/:id",verifyToken,delpost);
 router.post("/add",verifyToken,addpost_nophoto); //사진 없을 때
 router.put("/edit/:id",verifyToken,editpost_nophoto); //사진 없을 때
-//router.post("/add/single",upload.single("photo"),addpost_onephoto); //사진 1개
-//router.post("/add/multi",upload.array("photo"),addpost_multiphoto); //사진 2개 이상
+router.put("/edit/multi/:id",verifyToken,upload.array("photo"),editpost_multiphoto);
+
+router.post("/add/multi",verifyToken,upload.array("photo"),addpost_multiphoto); //사진 2개 이상
+router.get("/join/:postid",verifyToken , join);
+router.get("/leave/:postid",verifyToken , leave);
 module.exports = router;
