@@ -81,8 +81,8 @@ const register = async function (req,res){
         req.body.student_id,
         req.body.name,
         req.body.nickname,
-        req.body.email,
-        req.body.birth,
+        req.body.email || NULL ,
+        req.body.birth || NULL,
         req.body.phone_num,
         req.body.department,
         salt,
@@ -160,6 +160,8 @@ const verifyIDPW = async function(req,res,next){
 
     }
 }
+
+
 /**
  * @swagger
  *
@@ -188,4 +190,5 @@ const verifyIDPW = async function(req,res,next){
 
 router.post("/register",register);
 router.post("/login",verifyIDPW,login);
+
 module.exports= router;

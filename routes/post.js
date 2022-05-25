@@ -19,11 +19,11 @@ const storage = multer.diskStorage({
 });
 
 const upload= multer({
-	storage:storage,
-	limits:{
-		files:10,
-		fileSize: 1024*1024*5
-	}
+   storage:storage,
+   limits:{
+      files:10,
+      fileSize: 1024*1024*5
+   }
 });
 
 
@@ -110,6 +110,7 @@ const addpost_multiphoto= async function(req,res){
     const goal_num=req.body.goal_num;
     const is_anony= req.body.is_anony;
     const is_number= req.body.is_number;
+    console.log(req.body);
     try{
         //게시글 저장.
         const [data] = await db
@@ -319,7 +320,7 @@ router.get("/:id",getpost);
 //router.put("/edit/single/:id",upload.single("photo"),editpost_onephoto);
 
 router.delete("/delete/:id",verifyToken,delpost);
-router.post("/add",verifyToken,addpost_nophoto); //사진 없을 때
+router.post("/add",addpost_nophoto); //사진 없을 때
 router.put("/edit/:id",verifyToken,editpost_nophoto); //사진 없을 때
 router.put("/edit/multi/:id",verifyToken,upload.array("photo"),editpost_multiphoto);
 
