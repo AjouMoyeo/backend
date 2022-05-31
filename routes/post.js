@@ -71,13 +71,14 @@ const getALLpost =async function(req,res){
 }
 
 const addpost_nophoto= async function(req,res){
+    const data= JSON.parse(req.body.data);
     const student_id = req.decoded._id;
-    const title= req.body.title;
-    const text= req.body.text;
-    const category=req.body.category;
-    const goal_num=req.body.goal_num;
-    const is_anony= req.body.is_anony;
-    const is_number= req.body.is_number;
+    const title= data.title;
+    const text= data.text;
+    const category=data.category;
+    const goal_num=data.goal_num;
+    const is_anony= data.is_anony;
+    const is_number= data.is_number;
     console.log(req.body);
     try{
 
@@ -101,16 +102,17 @@ const addpost_nophoto= async function(req,res){
 
 }
 
-const addpost_multiphoto= async function(req,res){
+const addpost_multiphoto= async function(req,res){  
     const photos = req.files;
+    const data= JSON.parse(req.body.data);
     const student_id = req.decoded._id;
-    const title= req.body.title;
-    const text= req.body.text;
-    const category=req.body.category;
-    const goal_num=req.body.goal_num;
-    const is_anony= req.body.is_anony;
-    const is_number= req.body.is_number;
-    console.log(req.body);
+    const title= data.title;
+    const text= data.text;
+    const category=data.category;
+    const goal_num=data.goal_num;
+    const is_anony= data.is_anony;
+    const is_number= data.is_number;
+    
     try{
         //게시글 저장.
         const [data] = await db
@@ -153,14 +155,15 @@ const addpost_multiphoto= async function(req,res){
 }
 
 const editpost_nophoto= async function(req,res){
+    const data= JSON.parse(req.body.data);
     const post_id = req.params.id;
     const student_id = req.decoded._id;
-    const title= req.body.title;
-    const text= req.body.text;
-    const category=req.body.category;
-    const goal_num=req.body.goal_num;
-    const is_anony= req.body.is_anony;
-    const is_number= req.body.is_number;
+    const title= data.title;
+    const text= data.text;
+    const category=data.category;
+    const goal_num=data.goal_num;
+    const is_anony= data.is_anony;
+    const is_number= data.is_number;
     try{
         const [checkID]= await db.promise().query(`select student_id from post where post_id=${post_id};`);
         console.log(checkID[0].student_id);
@@ -190,15 +193,16 @@ const editpost_nophoto= async function(req,res){
 
 }
 const editpost_multiphoto=async function(req,res){
+    const data= JSON.parse(req.body.data);
     const photos = req.files;
     const post_id = req.params.id;
     const student_id = req.decoded._id;
-    const title= req.body.title;
-    const text= req.body.text;
-    const category=req.body.category;
-    const goal_num=req.body.goal_num;
-    const is_anony= req.body.is_anony;
-    const is_number= req.body.is_number;
+    const title= data.title;
+    const text= data.text;
+    const category=data.category;
+    const goal_num=data.goal_num;
+    const is_anony= data.is_anony;
+    const is_number= data.is_number;
     try{
         const [checkID]= await db.promise().query(`select student_id from post where post_id=${post_id};`);
         console.log(checkID);
