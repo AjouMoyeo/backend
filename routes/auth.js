@@ -89,7 +89,7 @@ const register = async function (req,res){
         refresh_token
     ]
     try{
-    await DB.promise().query(`INSERT INTO student(student_id,name,nickname,email,birth,phone_num,department,salt,password,refresh_token) VALUES(?,?,?,?,?,?,?,?,?,?);`, uservalue);
+    await DB.promise().query(`INSERT INTO student(student_id,name,nickname,phone_num,department,salt,password,refresh_token) VALUES(?,?,?,?,?,?,?,?);`, uservalue);
     console.log("성공");
     res.json({status:"success",text:"회원가입 성공"});
     }catch(e){
