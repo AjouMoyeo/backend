@@ -23,6 +23,8 @@ function createHashedPassword(plainPassword) {
       salt,
     ];
 }
+
+
 const emailVerification = async function (req, res) {
     const email = req.body.email;
     const number = generateRandom(111111, 999999);
@@ -209,6 +211,7 @@ const login = async function(req,res){
  */
 
 
+// localhost:3000/auth 
 
 router.post("/register",register);
 router.post("/login",verifyIDPW,login);
