@@ -81,8 +81,7 @@ const register = async function (req,res){
         req.body.student_id,
         req.body.name,
         req.body.nickname,
-        req.body.email || NULL ,
-        req.body.birth || NULL,
+      
         req.body.phone_num,
         req.body.department,
         salt,
