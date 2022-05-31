@@ -36,31 +36,28 @@ const emailVerification = async function (req, res) {
     };
   
     try {
-      const [data] = await DB.promise().query(
-        `select email from users where email = '${email}'`
-      );
-      console.log(data);
-      if (Object.keys(data).length === 0) {
-        //이메일 verification 코드
-        const result = await smtpTransport.sendMail(
-          mailoptions,
-          (error, response) => {
-            if (error) {
-              console.log(error);
-              return res.status(400).send({ status: "이메일 오류" });
-            } else {
-              /* 클라이언트에게 인증 번호를 보내서 사용자가 맞게 입력하는지 확인! */
-              return res.status(200).send({
-                number: number,
-              });
-            }
-            smtpTransport.close();
+  
+      
+     
+      //이메일 verification 코드
+      const result = await smtpTransport.sendMail(
+        mailoptions,
+        (error, response) => {
+          if (error) {
+            console.log(error);
+            return res.status(400).send({ status: "fail",text:"이메일 오류" });
+          } else {
+            /* 클라이언트에게 인증 번호를 보내서 사용자가 맞게 입력하는지 확인! */
+            return res.status(200).send({
+              status:"success",
+              number: number,
+            });
           }
-        );
-      } else {
-        //이미 존재하는 유저.
-        res.json({ status: "email duplicate" });
-      }
+          smtpTransport.close();
+        }
+      );
+    
+      
     } catch (e) {
       console.log(e);
       res.status(400).json({ text: "ErrorCode:400, 잘못된 요청입니다." });
@@ -211,7 +208,7 @@ const login = async function(req,res){
  */
 
 
-// localhost:3000/auth 
+// localhost:3000/auth
 
 router.post("/register",register);
 router.post("/login",verifyIDPW,login);
