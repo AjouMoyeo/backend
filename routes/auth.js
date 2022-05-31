@@ -139,25 +139,48 @@ const verifyIDPW = async function(req,res,next){
   }
 }
 
-  const login = async function(req,res){
-    const student_id = req.body.student_id;
-    const password = req.body.password;
-    try{
-
-      const token= jwt.sign({_id:student_id},process.env.JWT_SECRET,{expiresIn:"1h",issuer:"AjouMoyeo"})
-      res.json({
-        status:"success",
-        text:"토큰이 발급되었습니다.",
-        token:token
-
-      })
-
-    }catch(e){
-      console.log("로그인 에러");
-      res.status(400).json({ status:"fail",text: "ErrorCode:400, 잘못된 요청입니다." });
-
+const checkID= async function(req,res){
+  try{
+    const checkingid= req.params.id;
+    const [data] = await DB.promise().query(`
+    SELECT student_id from student where student_id=${checkingid}`);
+    console.log(data);
+    console.log(data[0]);
+    if(data[0]==undefined){
+      res.json({status:"fail", text:"이미 가입한 회원입니다."});
 
     }
+    else{
+      res.json({status:"success",text:"가입하지 않은 회원입니다."});
+    }
+  }catch(e){
+    
+    res.status(400).json({ status:"fail",text: "ErrorCode:400, 잘못된 요청입니다." });
+
+  }
+
+}
+
+
+const login = async function(req,res){
+  const student_id = req.body.student_id;
+  const password = req.body.password;
+  try{
+
+    const token= jwt.sign({_id:student_id},process.env.JWT_SECRET,{expiresIn:"1h",issuer:"AjouMoyeo"})
+    res.json({
+      status:"success",
+      text:"토큰이 발급되었습니다.",
+      token:token
+
+    })
+
+  }catch(e){
+    console.log("로그인 에러");
+    res.status(400).json({ status:"fail",text: "ErrorCode:400, 잘못된 요청입니다." });
+
+
+  }
 }
 
 
@@ -189,5 +212,6 @@ const verifyIDPW = async function(req,res,next){
 
 router.post("/register",register);
 router.post("/login",verifyIDPW,login);
-
+router.get("/checkID/:id",checkID);
+router.post("/email",emailVerification);
 module.exports= router;

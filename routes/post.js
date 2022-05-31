@@ -318,17 +318,14 @@ const leave = async function(req,res){
 
 
 //router.post("/search",searchpostbytitle);
-router.get("/all",getALLpost);
+router.get("/",getALLpost);
 router.get("/:id",getpost);
+router.delete("/:id",verifyToken,delpost);
+router.post("/",addpost_nophoto); //사진 없을 때
+router.post("/multi",verifyToken,upload.array("photo"),addpost_multiphoto); //사진 2개 이상
+router.put("/:id",verifyToken,editpost_nophoto); //사진 없을 때
+router.put("/multi/:id",verifyToken,upload.array("photo"),editpost_multiphoto);
 
-//router.put("/edit/single/:id",upload.single("photo"),editpost_onephoto);
-
-router.delete("/delete/:id",verifyToken,delpost);
-router.post("/add",addpost_nophoto); //사진 없을 때
-router.put("/edit/:id",verifyToken,editpost_nophoto); //사진 없을 때
-router.put("/edit/multi/:id",verifyToken,upload.array("photo"),editpost_multiphoto);
-
-router.post("/add/multi",verifyToken,upload.array("photo"),addpost_multiphoto); //사진 2개 이상
 router.get("/join/:postid",verifyToken , join);
 router.get("/leave/:postid",verifyToken , leave);
 module.exports = router;
