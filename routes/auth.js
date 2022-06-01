@@ -146,11 +146,10 @@ const checkID= async function(req,res){
     console.log(data);
     console.log(data[0]);
     if(data[0]==undefined){
-      res.json({status:"fail", text:"이미 가입한 회원입니다."});
-
+      res.json({status:"success",text:"가입하지 않은 회원입니다."});
     }
     else{
-      res.json({status:"success",text:"가입하지 않은 회원입니다."});
+      res.json({status:"fail", text:"이미 가입한 회원입니다."});
     }
   }catch(e){
     
