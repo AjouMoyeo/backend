@@ -297,7 +297,6 @@ const join = async function(req,res){
 const leave = async function(req,res){
     const student_id=req.decoded._id;
     const post_id = req.params.postid;
-
     try{
         const [result] = await db.promise().query(`select student_id from participant where post_id =${post_id} and student_id=${student_id}`);
         console.log(result[0]);
@@ -305,7 +304,7 @@ const leave = async function(req,res){
             res.json({status:"fail", text:"모임에 참여하지 않아 취소 할 수 없습니다."});
         }
         else{ //이미 참여 했던 경우
-            await db.promise().query(`insert into participant(student_id,post_id) values(${student_id},${post_id})`);
+            await db.promise().query(`delete into participant(student_id,post_id) values(${student_id},${post_id})`);
             res.json({status:"success",text:"모임 참여를 취소하였습니다."});
         }
 
