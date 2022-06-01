@@ -275,7 +275,7 @@ const join = async function(req,res){
 
         // 1. 이미 참여했는지 확인 후 참여하지 않았다면 참여 진행.
 
-        const [result] = await db.promise().query(`select userid from particiapnt where post_id =${post_id} and student_id=${student_id}`);
+        const [result] = await db.promise().query(`select student_id from participant where post_id =${post_id} and student_id=${student_id}`);
         console.log(result[0]);
         if (result[0]==undefined){
             await db.promise().query(`insert into participant(student_id,post_id) values(${student_id},${post_id})`);
@@ -299,7 +299,7 @@ const leave = async function(req,res){
     const post_id = req.params.postid;
 
     try{
-        const [result] = await db.promise().query(`select userid from particiapnt where post_id =${post_id} and student_id=${student_id}`);
+        const [result] = await db.promise().query(`select student_id from participant where post_id =${post_id} and student_id=${student_id}`);
         console.log(result[0]);
         if (result[0]==undefined){
             res.json({status:"fail", text:"모임에 참여하지 않아 취소 할 수 없습니다."});
