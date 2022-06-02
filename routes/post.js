@@ -205,8 +205,7 @@ const editpost_multiphoto=async function(req,res){
     const is_number= data.is_number;
     try{
         const [checkID]= await db.promise().query(`select student_id from post where post_id=${post_id};`);
-        console.log(checkID);
-        if(checkID.student_id!=student_id){
+        if(checkID[0].student_id!=student_id){
           res.json({status:"fail",text:"글 작성자만 수정이 가능합니다."});
         }
         else{
