@@ -13,7 +13,7 @@ const { swaggerUi, specs } = require('./swagger');
 
 
 const bodyParser= require("body-parser");
-const auth = require("./routes/auth");
+const auth = require("./routes/student");
 const post = require("./routes/post");
 
 const db= require('./database.js');

@@ -29,7 +29,7 @@ const emailVerification = async function (req, res) {
     const email = req.body.email;
     const number = generateRandom(111111, 999999);
     const mailoptions = {
-      from: "AjouMoyeo@naver.com",
+      from: "jh6car@naver.com",
       to: email,
       subject: "[아주모여] 인증 관련 메일입니다.",
       text: "오른쪽 숫자 6자리를 입력해주세요 : " + number,
@@ -184,7 +184,30 @@ const login = async function(req,res){
 
   }
 }
+const checkNick = async function(req,res){
+  const nickname = req.body.nickname;
+  try{
+    const [data]= await DB.promise().query(`select count(*) as cnt FROM student WHERE nickname='${nickname}' ;`);
+    console.log(data);
+    if(data[0].cnt==0){
+      res.json({status:"success",text:"중복되지 않은 닉네임 입니다."});
+    }
+    else if (data[0].cnt>=1){
+      //중복된 닉네임
+      res.json({status:"fail",text:"중복된 닉네임 입니다."});
+      
 
+    }
+
+
+  }catch(e){
+    console.log("닉네임 체크 에러",e);
+    res.status(400).json({ status:"fail",text: "ErrorCode:400, 잘못된 요청입니다." });
+
+
+  }
+
+}
 
 /**
  * @swagger
@@ -216,5 +239,6 @@ const login = async function(req,res){
 router.post("/register",register);
 router.post("/login",verifyIDPW,login);
 router.get("/checkID/:id",checkID);
+router.post("/checkNick/",checkNick);
 router.post("/email",emailVerification);
 module.exports= router;

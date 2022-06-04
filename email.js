@@ -1,9 +1,9 @@
 const nodemailer = require('nodemailer');
 require("dotenv").config();
 const smtpTransport = nodemailer.createTransport({
-    service: 'Naver',
+    service: 'naver',
     host: 'smtp.naver.com',
-    
+    port: 465,
     auth: {
       user: process.env.NM_EMAIL,
       pass: process.env.NM_PW
