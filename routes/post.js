@@ -213,6 +213,7 @@ const editpost_multiphoto=async function(req,res){
           res.json({status:"fail",text:"글 작성자만 수정이 가능합니다."});
         }
         else{
+           
             await db.promise().query(`DELETE from photo where post_id=${post_id};`); //본래 있던 사진 삭제.
             photos.forEach(async (photo, idx) => {
                 const photo_url = `/photo/${photo.filename}`;
