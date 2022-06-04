@@ -228,9 +228,7 @@ const editpost_multiphoto=async function(req,res){
                 }
             })
             await db.promise().query(
-                `UPDATE post 
-                SET title='${title}', text='${text}',goal_num='${goal_num}',category='${category}',is_anony=${is_anony},is_number=${is_number}'  
-                WHERE post_id=${post_id};`)
+                `UPDATE post SET title='${title}', text='${text}',goal_num='${goal_num}',category='${category}',is_anony=${is_anony},is_number=${is_number}' WHERE post_id=${post_id};`)
                 res.json({status:"success",text:"글 수정이 완료되었습니다."});
         }
     }catch(e){
