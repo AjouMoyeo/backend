@@ -142,9 +142,10 @@ const addpost_multiphoto= async function(req,res){
             .query(`UPDATE photo SET is_thumbnail=1 WHERE url='${photo_url}';`);
         }
 
-        //글 작성자 판매자로 추가
-        await db.promise().query(`INSERT INTO participant(student_id, post_id) values(${student_id}, ${insertid})`);
+        
       });
+      //글 작성자 판매자로 추가
+      await db.promise().query(`INSERT INTO participant(student_id, post_id) values(${student_id}, ${insertid})`);
   
       res.json({ status: "success" ,text:"글 작성을 완료하였습니다."});
 
