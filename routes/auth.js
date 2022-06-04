@@ -167,13 +167,13 @@ const login = async function(req,res){
 
     const token= jwt.sign({_id:student_id},process.env.JWT_SECRET,{expiresIn:"1h",issuer:"AjouMoyeo"})
     console.log(1);
-    const data= await DB.promise().query(`select * from student where student_id=${student_id}`)
-    console.log(data);
+    const [data]= await DB.promise().query(`select * from student where student_id=${student_id}`)
+    console.log(data[0]);
     res.json({
       status:"success",
       text:"토큰이 발급되었습니다.",
       token:token,
-      nickname:data[0].nickname
+      nickname:data[0].NICKNAME
 
     })
 
