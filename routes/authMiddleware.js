@@ -8,7 +8,7 @@ const verifyToken= async function (req,res,next){
     try{
       console.log(req.headers.authorization);
       req.decoded = jwt.verify(req.headers.authorization, process.env.JWT_SECRET);
-      console.log("!!!!"+req.decoded);
+      //console.log("!!!!"+req.decoded);
       return next();
         
 

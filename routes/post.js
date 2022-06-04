@@ -32,20 +32,23 @@ const getpost = async function (req,res){
     /*
     디테일한 post 정보 가져오는 코드 (댓글 포함)
     */
+
+    const student_id =req.decoded._id;
     const id = req.params.id;
     try{
         const [post]= await db.promise().query(`SELECT * FROM post AS p JOIN student AS s ON p.student_id=s.student_id WHERE p.post_id=${id};`);
         const [photos]= await db.promise().query(`SELECT * FROM photo WHERE post_id=${id} ORDER BY is_thumbnail desc;`);
-        console.log(photos);
+       // console.log(photos);
         post[0].photos= new Array();
         photos.forEach((photo)=>{
             post[0].photos.push(photo.url);
-
         })
-        console.log(post[0].title);
-    
-        console.log(post);
-        res.send({status:"success",post});
+        //console.log(post[0].title);
+        const [is_joined]= await db.promise().query(`select count(*) as cnt FROM participant WHERE post_id=${id} AND student_id=${student_id}`)
+        console.log("isjoined"+is_joined);
+        //post.push({is_joined:is_joined[0].cnt});
+        //console.log(post);
+        res.send({status:"success",post,is_joined:is_joined[0].cnt});
     }catch(e){
         console.log('getpost에서 error 발생!');
         res.status(400).json({ status: "fail",e });
@@ -279,6 +282,8 @@ const join = async function(req,res){
         console.log(result[0]);
         if (result[0]==undefined){
             await db.promise().query(`insert into participant(student_id,post_id) values(${student_id},${post_id})`);
+            await db.promise().query(`update post set cur_num=cur_num+1 where post_id=${post_id}`);
+            
             res.json({status:"success",text:"모임에 참여하였습니다."});
         }
         else{ //이미 참여 했던 경우
@@ -302,6 +307,7 @@ const leave = async function(req,res){
         const [result] = await db.promise().query(`select userid from particiapnt where post_id =${post_id} and student_id=${student_id}`);
         console.log(result[0]);
         if (result[0]==undefined){
+            await db.promise().query(`update post set cur_num=cur_num-1 where post_id=${post_id}`);
             res.json({status:"fail", text:"모임에 참여하지 않아 취소 할 수 없습니다."});
         }
         else{ //이미 참여 했던 경우
@@ -319,7 +325,7 @@ const leave = async function(req,res){
 
 //router.post("/search",searchpostbytitle);
 router.get("/",getALLpost);
-router.get("/:id",getpost);
+router.get("/:id",verifyToken,getpost);
 router.delete("/:id",verifyToken,delpost);
 router.post("/",addpost_nophoto); //사진 없을 때
 router.post("/multi",verifyToken,upload.array("photo"),addpost_multiphoto); //사진 2개 이상

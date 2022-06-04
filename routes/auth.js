@@ -167,15 +167,19 @@ const login = async function(req,res){
   try{
 
     const token= jwt.sign({_id:student_id},process.env.JWT_SECRET,{expiresIn:"1h",issuer:"AjouMoyeo"})
+    console.log(1);
+    const data= await DB.promise().query(`select * from student where student_id=${student_id}`)
+    console.log(data);
     res.json({
       status:"success",
       text:"토큰이 발급되었습니다.",
-      token:token
+      token:token,
+      nickname:data[0].nickname
 
     })
 
   }catch(e){
-    console.log("로그인 에러");
+    console.log("로그인 에러",e);
     res.status(400).json({ status:"fail",text: "ErrorCode:400, 잘못된 요청입니다." });
 
 
