@@ -208,8 +208,7 @@ const editpost_multiphoto=async function(req,res){
     const is_number= data.is_number;
     try{
         const [checkID]= await db.promise().query(`select student_id from post where post_id=${post_id};`);
-        console.log(checkID);
-        if(checkID.student_id!=student_id){
+        if(checkID[0].student_id!=student_id){
           res.json({status:"fail",text:"글 작성자만 수정이 가능합니다."});
         }
         else{
@@ -278,7 +277,7 @@ const join = async function(req,res){
 
         // 1. 이미 참여했는지 확인 후 참여하지 않았다면 참여 진행.
 
-        const [result] = await db.promise().query(`select userid from particiapnt where post_id =${post_id} and student_id=${student_id}`);
+        const [result] = await db.promise().query(`select student_id from participant where post_id =${post_id} and student_id=${student_id}`);
         console.log(result[0]);
         if (result[0]==undefined){
             await db.promise().query(`insert into participant(student_id,post_id) values(${student_id},${post_id})`);
@@ -302,16 +301,15 @@ const join = async function(req,res){
 const leave = async function(req,res){
     const student_id=req.decoded._id;
     const post_id = req.params.postid;
-
     try{
-        const [result] = await db.promise().query(`select userid from particiapnt where post_id =${post_id} and student_id=${student_id}`);
+        const [result] = await db.promise().query(`select student_id from participant where post_id =${post_id} and student_id=${student_id}`);
         console.log(result[0]);
         if (result[0]==undefined){
             await db.promise().query(`update post set cur_num=cur_num-1 where post_id=${post_id}`);
             res.json({status:"fail", text:"모임에 참여하지 않아 취소 할 수 없습니다."});
         }
         else{ //이미 참여 했던 경우
-            await db.promise().query(`insert into participant(student_id,post_id) values(${student_id},${post_id})`);
+            await db.promise().query(`delete from participant where post_id =${post_id} and student_id=${student_id}`);
             res.json({status:"success",text:"모임 참여를 취소하였습니다."});
         }
 
