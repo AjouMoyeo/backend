@@ -215,7 +215,7 @@ const editpost_multiphoto=async function(req,res){
           res.json({status:"fail",text:"글 작성자만 수정이 가능합니다."});
         }
         else{
-            if(!req.files){
+            if(req.files.length  ==0 ){
                 //수정했는데 사진이 없는경우
                 console.log("no_photo");
                 await db.promise().query(
