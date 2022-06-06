@@ -207,6 +207,8 @@ const editpost_multiphoto=async function(req,res){
     const goal_num=data.goal_num;
     const is_anony= data.is_anony;
     const is_number= data.is_number;
+    console.log(req.files);
+    console.log("edit multi");
     try{
         const [checkID]= await db.promise().query(`select student_id from post where post_id=${post_id};`);
         if(checkID[0].student_id!=student_id){
@@ -215,6 +217,7 @@ const editpost_multiphoto=async function(req,res){
         else{
             if(!req.files){
                 //수정했는데 사진이 없는경우
+                console.log("no_photo");
                 await db.promise().query(
                     `UPDATE post SET title='${title}', text='${text}',goal_num=${goal_num},category='${category}',is_anony=${is_anony},is_number=${is_number} WHERE post_id=${post_id};`)
                 res.json({status:"success",text:"글 수정이 완료되었습니다."});
