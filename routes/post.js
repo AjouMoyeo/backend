@@ -59,7 +59,7 @@ const getpost = async function (req,res){
 const getALLpost =async function(req,res){
     //모든 post 가져오는ㄱ코드
     try{
-        const [data] = await db.promise().query(`SELECT p.post_id, p.student_id,p.title, p.text,p.category,p.goal_num,p.cur_num, p.is_anony, p.is_number, p.created_at,s.name, s.nickname, ph.url,ph.is_thumbnail FROM post as p INNER JOIN student as s ON p.student_id=s.student_id LEFT JOIN photo as ph ON ph.post_id=p.post_id ORDER BY p.created_at ASC`);
+        const [data] = await db.promise().query(`SELECT p.post_id, p.student_id,p.title, p.text,p.category,p.goal_num,p.cur_num, p.is_anony, p.is_number, p.created_at,s.name, s.nickname, ph.url,ph.is_thumbnail FROM post as p INNER JOIN student as s ON p.student_id=s.student_id LEFT JOIN photo as ph ON ph.post_id=p.post_id ORDER BY p.post_id desc`);
         //console.log(data);
         res.json({status:"success",data});
 
