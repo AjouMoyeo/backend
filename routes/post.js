@@ -215,12 +215,6 @@ const editpost_multiphoto=async function(req,res){
         else{
             if(!req.files){
                 //수정했는데 사진이 없는경우
-                const default_url='/photo/default.jpg';
-                await db
-                    .promise()
-                    .query(
-                        `UPDATE photo SET url=${default_url} where post_id=${post_id} AND is_thumbnail=1;`);
-                await db.promise().query(`DELETE from photo where post_id=${post_id} AND is_thumbnail=0;`); //썸네일 아닌 사진 삭제   
                 await db.promise().query(
                     `UPDATE post SET title='${title}', text='${text}',goal_num=${goal_num},category='${category}',is_anony=${is_anony},is_number=${is_number} WHERE post_id=${post_id};`)
                 res.json({status:"success",text:"글 수정이 완료되었습니다."});
